@@ -1,24 +1,92 @@
-# Compiled class file
-*.class
+function sendAllEmails() {
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spreadsheet.getSheetByName(" "); //Coloca o nome da aba da sua planilha.
+  var lastRow = sheet.getLastRow();
 
-# Log file
-*.log
+  // Pegando os dados do cliente que está na última linha
+  var clientData = {
+    id: sheet.getRange(lastRow, 10).getValue(),
+    produtoEservico: sheet.getRange(lastRow, 11).getValue(),
+    nome: sheet.getRange(lastRow, 4).getValue(),
+    empresa: sheet.getRange(lastRow, 3).getValue(),
+    descricao: sheet.getRange(lastRow, 13).getValue(),
+    email: sheet.getRange(lastRow, 6).getValue(),
+    emailAtivo: sheet.getRange(lastRow, 19).getValue(),
+    emailExterno: sheet.getRange(lastRow, 20).getValue(),
+    emailPA: sheet.getRange(lastRow, 21).getValue(),
+    telefone: sheet.getRange(lastRow, 7).getValue(),
+    sdr: sheet.getRange(lastRow, 26).getValue(),
+    cnpj: sheet.getRange(lastRow, 5).getValue(),
+    endereco: sheet.getRange(lastRow, 18).getValue(),
+    quantidadeLicenca: sheet.getRange(lastRow, 15).getValue()
+  };
 
-# BlueJ files
-*.ctxt
+  // Envio do email para o Marketing.
+  var mktMessage = composeMktEmailMessage(clientData);
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+  // Envio do email para o Suporte.
+  var supportMessage = composeSupportEmailMessage(clientData);
 
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
+  // enviando email Marketing.
+  MailApp.sendEmail(mktMessage);
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+  // enviando email Suporte
+  MailApp.sendEmail(supportMessage);
+
+  //Logger.log(clientData);
+}
+
+function composeMktEmailMessage(clientData) {
+ var { nome, empresa, email, emailAtivo, emailExterno, emailPA } = clientData;
+
+ return {
+    to: " ", // Acrescente o email e modifique o corpo caso queira.
+    cc: "",
+    subject: `Novo cliente ${nome} - Enviar email de boas vindas`,
+    htmlBody: `
+      <p> Olá , tudo bem? </p> // Antes da virgula coloque o nome da pessoa
+
+      <p>O cliente ${nome} da empresa ${empresa}, acabou de entrar para o nosso painel de clientes. </p>
+
+      <p> Aqui se encontram todos os emails do cliente, para que seja efetuado o envio dos emails: </p>
+      <p> ${email} <br>
+      <p> ${emailExterno} <br>
+      <p> ${emailAtivo} <br>
+      <p> ${emailPA} <br>
+      <p> Qualquer dúvida estou à disposição. </p>
+      `,
+    name: "",
+  };
+}
+
+function composeSupportEmailMessage(clientData) {
+  var { id, produtoEservico, nome, empresa, descricao, email, telefone, sdr , quantidadeLicenca} = clientData;
+
+  return {
+    to: " ", // Acrescente o email e modifique o corpo caso queira.
+    cc: "",
+    subject: `Chamado N° ${id} - ${produtoEservico}`,
+    htmlBody: `
+      <p>Olá suporte,<br>
+
+      <p>Seguem informações para ${produtoEservico} do novo cliente ${nome}. </p>
+      <p> Descrição: ${descricao} 
+      <p> Quantidade de licenças: ${quantidadeLicenca} </p>
+
+      <p>INFORMAÇÕES DO CLIENTE:<br>
+
+      <p>Nome: ${nome} <br>
+
+      <p>Empresa: ${empresa} <br>
+
+      <p>Email: ${email} <br>
+
+      <p>Telefone: ${telefone} <br>
+
+      <p> Caso tenha dúvidas, estarei disponível. <br>
+
+      <p> Atenciosamente; <br>
+      `,
+     name: "",
+  };
+}
